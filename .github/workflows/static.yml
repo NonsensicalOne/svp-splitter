@@ -19,5 +19,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: static-files
-        path: gitroot/static/
+        path: static/
         retention-days: 7
