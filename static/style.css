@@ -1,0 +1,352 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #ffb7d5, #e1b0ff, #ce6079);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+  color: #5a3a6e;
+  min-height: 100vh;
+  padding: 20px;
+  overflow-x: hidden;
+}
+
+@keyframes gradientBG {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Anime decorations */
+.decoration {
+  position: absolute;
+  z-index: -1;
+}
+
+.decoration:nth-child(1) {
+  top: 50px;
+  left: -50px;
+  font-size: 120px;
+  color: rgba(255, 255, 255, 0.1);
+  transform: rotate(-15deg);
+}
+
+.decoration:nth-child(2) {
+  top: 150px;
+  right: -50px;
+  font-size: 100px;
+  color: rgba(255, 255, 255, 0.1);
+  transform: rotate(20deg);
+}
+
+.decoration:nth-child(3) {
+  bottom: 100px;
+  left: 100px;
+  font-size: 80px;
+  color: rgba(255, 255, 255, 0.1);
+  transform: rotate(10deg);
+}
+
+/* Header styling */
+header {
+  text-align: center;
+  padding: 30px 0;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.teto-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.teto-title h1 {
+  font-size: 3.5rem;
+  background: linear-gradient(45deg, #ff6b9d, #a55eea);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.teto-icon {
+  font-size: 3rem;
+  color: #ff6b9d;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  color: #5a3a6e;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Main content */
+.main-content {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.teto-card {
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(154, 96, 212, 0.2);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  flex: 1;
+  min-width: 300px;
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  color: #a55eea;
+  font-size: 1.8rem;
+}
+
+.card-title i {
+  color: #ff6b9d;
+}
+
+/* Form styling */
+.form-group {
+  margin-bottom: 25px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #5a3a6e;
+}
+
+.file-input {
+  width: 100%;
+  padding: 15px;
+  border: 2px dashed #c19ee0;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.file-input:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: #a55eea;
+}
+
+.file-input.drag-over {
+  background: rgba(193, 158, 224, 0.2);
+  border-color: #ff6b9d;
+}
+
+input[type="number"] {
+  width: 100%;
+  padding: 15px;
+  border-radius: 15px;
+  border: 2px solid #c19ee0;
+  background: rgba(255, 255, 255, 0.5);
+  font-size: 1rem;
+  color: #5a3a6e;
+}
+
+input[type="number"]:focus {
+  outline: none;
+  border-color: #a55eea;
+}
+
+.btn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(45deg, #ff6b9d, #a55eea);
+  color: white;
+  border: none;
+  border-radius: 15px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(154, 96, 212, 0.4);
+}
+
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(154, 96, 212, 0.6);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  transform: none;
+  cursor: not-allowed;
+}
+
+/* Results section */
+.results {
+  margin-top: 30px;
+}
+
+.result-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  margin-bottom: 15px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 15px;
+  border: 2px solid rgba(193, 158, 224, 0.3);
+  transition: all 0.3s ease;
+}
+
+.result-item:hover {
+  transform: translateX(5px);
+  border-color: #ff6b9d;
+}
+
+.result-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.result-name {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.result-stats {
+  font-size: 0.9rem;
+  color: #7c5a9e;
+}
+
+.download-btn {
+  background: linear-gradient(45deg, #5ac8fa, #a55eea);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.download-btn:hover {
+  transform: scale(1.05);
+}
+
+.error-message {
+  background: rgba(255, 107, 107, 0.2);
+  border: 2px solid rgba(255, 107, 107, 0.5);
+  color: #d63031;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.success-message {
+  background: rgba(107, 255, 107, 0.2);
+  border: 2px solid rgba(107, 255, 107, 0.5);
+  color: #00b894;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+/* Teto info card */
+.teto-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.teto-avatar {
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(45deg, #ff6b9d, #a55eea);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.teto-bio {
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 15px;
+  padding: 20px;
+  flex: 1;
+}
+
+.teto-bio h3 {
+  color: #a55eea;
+  margin-bottom: 10px;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 30px 0;
+  color: #5a3a6e;
+  font-size: 0.9rem;
+  margin-top: 30px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .main-content {
+    flex-direction: column;
+  }
+
+  .teto-title h1 {
+    font-size: 2.5rem;
+  }
+
+  .teto-info {
+    flex-direction: column;
+    text-align: center;
+  }
+}

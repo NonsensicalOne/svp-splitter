@@ -1,0 +1,23 @@
+name: Upload Static Files
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  upload-static:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Upload static files
+      uses: actions/upload-artifact@v4
+      with:
+        name: static-files
+        path: gitroot/static/
+        retention-days: 7

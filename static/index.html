@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teto's SVP Splitter</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/style.css">
+<body>
+    <div class="container">
+        <div class="decoration"><i class="fas fa-music"></i></div>
+        <div class="decoration"><i class="fas fa-headphones"></i></div>
+        <div class="decoration"><i class="fas fa-microphone"></i></div>
+        
+        <header>
+            <div class="teto-title">
+                <i class="fas fa-star teto-icon"></i>
+                <h1>Teto's SVP Splitter</h1>
+                <i class="fas fa-star teto-icon"></i>
+            </div>
+            <p class="subtitle">Split your Synthesizer V project files into smaller chunks with Kasane Teto's magical assistance! Perfect for managing large vocal projects.</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="teto-card">
+                <h2 class="card-title"><i class="fas fa-wand-magic-sparkles"></i> SVP Splitter Tool</h2>
+                
+                <div id="messageContainer"></div>
+                
+                <div class="form-group">
+                    <label for="svpFile"><i class="fas fa-file-audio"></i> Select SVP File</label>
+                    <div class="file-input" id="dropZone">
+                        <p>Drag & drop your .svp file here</p>
+                        <p>or</p>
+                        <p><button class="btn" style="width: auto; margin: 10px auto;">Choose File</button></p>
+                        <input type="file" id="svpFile" accept=".svp" style="display: none;">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="notesPerChunk"><i class="fas fa-music"></i> Notes per Chunk</label>
+                    <input type="number" id="notesPerChunk" value="39" min="1">
+                </div>
+                
+                <button id="splitBtn" class="btn"><i class="fas fa-cut"></i> Split SVP File</button>
+                
+                <div class="results" id="resultsSection" style="display: none;">
+                    <h3><i class="fas fa-download"></i> Split Files:</h3>
+                    <div id="resultsContainer"></div>
+                </div>
+            </div>
+            
+            <div class="teto-card">
+                <h2 class="card-title"><i class="fas fa-info-circle"></i> How to Use</h2>
+                <div class="form-group">
+                    <ol style="padding-left: 20px; line-height: 2;">
+                        <li>Upload your Synthesizer V project (.svp) file</li>
+                        <li>Set the number of notes per chunk (default is 39)</li>
+                        <li>Click "Split SVP File" to process your project</li>
+                        <li>Download the split files from the results section</li>
+                    </ol>
+                </div>
+                
+                <h2 class="card-title"><i class="fas fa-lightbulb"></i> Tips</h2>
+                <div class="form-group">
+                    <ul style="padding-left: 20px; line-height: 2;">
+                        <li>Smaller chunks are easier to edit and process</li>
+                        <li>Default value (39) works well for most projects</li>
+                        <li>Original file remains unchanged</li>
+                        <li>Files are processed in your browser - no uploads!</li>
+                    </ul>
+                </div>
+                
+                <h2 class="card-title"><i class="fas fa-exclamation-triangle"></i> Important</h2>
+                <div class="form-group">
+                    <p>This tool processes files locally in your browser. Your files are never uploaded to any server.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="teto-info">
+            <div class="teto-avatar">
+                <img src="/pfp.jpg" class="teto-avatar">
+            </div>
+            <div class="teto-bio">
+                <h3>About Kasane Teto</h3>
+                <p>Kasane Teto is a popular Japanese VOCALOID and UTAU voicebank. Originally created as a hoax, she gained immense popularity and was later officially recognized. Teto is known for her energetic and versatile voice, making her a favorite among vocal synth producers worldwide.</p>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Made with ♥ for vocal synth producers who can't afford Synthesizer V</p>
+        </footer>
+    </div>
+
+    <script>
+        // DOM elements
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('svpFile');
+        const splitBtn = document.getElementById('splitBtn');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const messageContainer = document.getElementById('messageContainer');
+        
+        let processedFiles = [];
+        
+        // Utility functions
+        function showMessage(message, type = 'info') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type === 'error' ? 'error-message' : 'success-message';
+            messageDiv.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check-circle'}"></i> ${message}`;
+            messageContainer.innerHTML = '';
+            messageContainer.appendChild(messageDiv);
+            setTimeout(() => {
+                messageDiv.style.opacity = '0';
+                setTimeout(() => messageDiv.remove(), 300);
+            }, 5000);
+        }
+        
+        function downloadBlob(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // SVP Processing Functions
+        function splitSVP(svpData, notesPerChunk) {
+            try {
+                const project = JSON.parse(svpData);
+                
+                // Check if the project has the expected structure
+                if (!project.library || !project.library[0] || !project.library[0].notes) {
+                    throw new Error('Invalid SVP file structure. Expected notes array not found.');
+                }
+                
+                const notes = project.library[0].notes;
+                const totalNotes = notes.length;
+                
+                if (totalNotes === 0) {
+                    throw new Error('No notes found in the SVP file.');
+                }
+                
+                showMessage(`Found ${totalNotes} notes in the project. Creating chunks...`, 'success');
+                
+                const chunks = [];
+                
+                for (let i = 0; i < totalNotes; i += notesPerChunk) {
+                    const chunkNotes = notes.slice(i, i + notesPerChunk);
+                    
+                    // Create a deep copy of the original project
+                    const newProject = JSON.parse(JSON.stringify(project));
+                    newProject.library[0].notes = chunkNotes;
+                    
+                    // Update project metadata if it exists
+                    if (newProject.title) {
+                        newProject.title = `${newProject.title} - Chunk ${Math.floor(i / notesPerChunk) + 1}`;
+                    }
+                    
+                    chunks.push({
+                        data: JSON.stringify(newProject, null, 2),
+                        noteCount: chunkNotes.length,
+                        chunkNumber: Math.floor(i / notesPerChunk) + 1
+                    });
+                }
+                
+                return chunks;
+                
+            } catch (error) {
+                throw new Error(`Failed to parse SVP file: ${error.message}`);
+            }
+        }
+        
+        // Event listeners for file input
+        dropZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        function handleFileSelect() {
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                if (!file.name.toLowerCase().endsWith('.svp')) {
+                    showMessage('Please select a valid .svp file.', 'error');
+                    return;
+                }
+                dropZone.innerHTML = `<p><i class="fas fa-file-audio"></i> Selected: ${file.name}</p><p>Size: ${formatFileSize(file.size)}</p>`;
+                dropZone.classList.add('drag-over');
+                setTimeout(() => dropZone.classList.remove('drag-over'), 2000);
+                messageContainer.innerHTML = '';
+            }
+        }
+        
+        // Drag and drop functionality
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.add('drag-over');
+            }, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.remove('drag-over');
+            }, false);
+        });
+        
+        dropZone.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0) {
+                const file = files[0];
+                if (!file.name.toLowerCase().endsWith('.svp')) {
+                    showMessage('Please drop a valid .svp file.', 'error');
+                    return;
+                }
+                
+                // Create a new FileList-like object
+                const fileList = {
+                    0: file,
+                    length: 1,
+                    item: function(index) { return this[index]; }
+                };
+                
+                // Manually set the files property
+                Object.defineProperty(fileInput, 'files', {
+                    value: fileList,
+                    writable: false
+                });
+                
+                handleFileSelect();
+            }
+        }
+        
+        // Split button functionality
+        splitBtn.addEventListener('click', async () => {
+            if (!fileInput.files.length) {
+                showMessage('Please select an SVP file first!', 'error');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const notesPerChunk = parseInt(document.getElementById('notesPerChunk').value) || 39;
+            
+            if (notesPerChunk < 1) {
+                showMessage('Notes per chunk must be at least 1.', 'error');
+                return;
+            }
+            
+            // Show processing state
+            splitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            splitBtn.disabled = true;
+            
+            try {
+                // Read the file
+                const fileContent = await readFileAsText(file);
+                
+                // Split the SVP
+                const chunks = splitSVP(fileContent, notesPerChunk);
+                
+                // Store processed files
+                processedFiles = chunks.map((chunk, index) => ({
+                    ...chunk,
+                    originalFilename: file.name,
+                    blob: new Blob([chunk.data], { type: 'application/json' })
+                }));
+                
+                // Show results
+                displayResults();
+                
+                showMessage(`Successfully split into ${chunks.length} chunks!`, 'success');
+                
+            } catch (error) {
+                showMessage(error.message, 'error');
+            } finally {
+                splitBtn.innerHTML = '<i class="fas fa-cut"></i> Split SVP File';
+                splitBtn.disabled = false;
+            }
+        });
+        
+        function readFileAsText(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = (e) => reject(new Error('Failed to read file'));
+                reader.readAsText(file);
+            });
+        }
+        
+        function displayResults() {
+            resultsSection.style.display = 'block';
+            resultsContainer.innerHTML = '';
+            
+            // Add success message
+            const successItem = document.createElement('div');
+            successItem.className = 'result-item';
+            successItem.style.background = 'rgba(154, 224, 172, 0.7)';
+            successItem.innerHTML = `
+                <div class="result-info">
+                    <div class="result-name">🎉 Success!</div>
+                    <div class="result-stats">Your SVP file has been split into ${processedFiles.length} chunks</div>
+                </div>
+                <i class="fas fa-check-circle" style="font-size: 2rem; color: #2ecc71;"></i>
+            `;
+            resultsContainer.appendChild(successItem);
+            
+            // Add download buttons for each chunk
+            processedFiles.forEach((file, index) => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                
+                const originalName = file.originalFilename.replace('.svp', '');
+                const chunkFilename = `${originalName}_chunk_${file.chunkNumber}.svp`;
+                
+                resultItem.innerHTML = `
+                    <div class="result-info">
+                        <div class="result-name">${chunkFilename}</div>
+                        <div class="result-stats">${file.noteCount} notes | ${formatFileSize(file.blob.size)}</div>
+                    </div>
+                    <button class="download-btn" onclick="downloadChunk(${index})">
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                `;
+                
+                resultsContainer.appendChild(resultItem);
+            });
+            
+            // Add download all button
+            const downloadAllItem = document.createElement('div');
+            downloadAllItem.className = 'result-item';
+            downloadAllItem.style.background = 'rgba(193, 158, 224, 0.3)';
+            downloadAllItem.innerHTML = `
+                <div class="result-info">
+                    <div class="result-name">Download All Chunks</div>
+                    <div class="result-stats">Get all ${processedFiles.length} files at once</div>
+                </div>
+                <button class="download-btn" onclick="downloadAllChunks()" style="background: linear-gradient(45deg, #ff6b9d, #a55eea);">
+                    <i class="fas fa-download"></i> Download All
+                </button>
+            `;
+            resultsContainer.appendChild(downloadAllItem);
+        }
+        
+        // Download functions
+        window.downloadChunk = function(index) {
+            const file = processedFiles[index];
+            const originalName = file.originalFilename.replace('.svp', '');
+            const filename = `${originalName}_chunk_${file.chunkNumber}.svp`;
+            downloadBlob(file.blob, filename);
+        };
+        
+        window.downloadAllChunks = function() {
+            processedFiles.forEach((file, index) => {
+                setTimeout(() => {
+                    window.downloadChunk(index);
+                }, index * 100); // Small delay between downloads
+            });
+        };
+        
+        // Animate elements on scroll
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.teto-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 100);
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>
